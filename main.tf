@@ -9,6 +9,7 @@ resource "aws_api_gateway_resource" "resource" {
   path_part   = var.path_part
 }
 
+
 ##############################################################################
 # Method Request
 ##############################################################################
@@ -59,24 +60,25 @@ resource "aws_api_gateway_integration" "integration" {
   rest_api_id             = var.rest_api_ids.id
   resource_id             = local.resource_id
   http_method             = var.http_method
-  integration_http_method = var.http_method
-  type                    = "AWS" # non-proxy integration # may switch to variable
+  integration_http_method = var.integration_http_method
+  type                    = var.type
 
   # OPTIONAL
-  connection_type      = null
-  connection_id        = null # only for VPC_LINK
-  uri                  = null # REQUIRED for AWS (this is the ARN of the Lambda function)
-  credentials          = null
-  request_templates    = null
-  request_parameters   = null
-  passthrough_behavior = null
-  cache_key_parameters = null
-  cache_namespace      = null
-  content_handling     = null
-  timeout_milliseconds = null
+  connection_type      = var.connection_type
+  connection_id        = var.connection_id # only for VPC_LINK
+  uri                  = var.uri # REQUIRED for AWS (this is the ARN of the Lambda function)
+  credentials          = var.credentials
+  request_templates    = var.request_templates
+  request_parameters   = var.request_parameters
+  passthrough_behavior = var.passthrough_behavior
+  cache_key_parameters = var.cache_key_parameters
+  cache_namespace      = var.cache_namespace
+  content_handling     = var.content_handling
+  timeout_milliseconds = var.timeout_milliseconds
 
-  tls_config {
-    insecure_skip_verification = null
+  dynamic "tls_config" {
+    for_each = var.insecure_skip_verification != null ? [1] : []
+    insecure_skip_verification = var.insecure_skip_verification
   }
 }
 
@@ -104,19 +106,19 @@ resource "aws_api_gateway_integration_response" "integration_response_success" {
 }
 
 resource "aws_api_gateway_integration_response" "integration_response" {
-  # TODO: FOR EACH STATUS CODE
+  for_each = local.lambda_status_codes
 
   # REQUIRED
   rest_api_id = var.rest_api_ids.id
   resource_id = local.resource_id
   http_method = var.http_method
-  status_code = null
+  status_code = each.key
 
   # OPTIONAL
-  content_handling    = null
+  content_handling    = var.content_handling
   response_parameters = null
   response_templates  = null
-  selection_pattern   = null
+  selection_pattern   = "${each.key} ${lookup(local.http_status_codes, each.key, null)}"
 
   depends_on = [
     aws_api_gateway_integration.integration,
@@ -126,7 +128,10 @@ resource "aws_api_gateway_integration_response" "integration_response" {
 
 resource "aws_api_gateway_integration_response" "options_integration_response" {
   count      = var.create_options_method ? 1 : 0
-  depends_on = [aws_api_gateway_integration.options_integration]
+  depends_on = [
+    aws_api_gateway_integration.options_integration,
+    aws_api_gateway_method_response.options_method_response
+  ]
 }
 
 
@@ -143,13 +148,13 @@ resource "aws_api_gateway_method_response" "method_response_success" {
 }
 
 resource "aws_api_gateway_method_response" "method_response" {
-  # TODO: FOR EACH STATUS CODE
+  for_each = local.lambda_status_codes
 
   # REQUIRED
   rest_api_id = var.rest_api_ids.id
   resource_id = local.resource_id
   http_method = var.http_method
-  status_code = null
+  status_code = each.key
 
   # OPTIONAL
   response_models     = null
