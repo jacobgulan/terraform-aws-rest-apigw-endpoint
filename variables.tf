@@ -67,3 +67,9 @@ variable "create_options_method" {
   type        = bool
   default     = true
 }
+
+variable "url" {
+  description = "The URL of the frontend"
+  type        = string
+  default     = "*"
+}

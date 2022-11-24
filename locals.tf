@@ -6,6 +6,15 @@ locals {
   parent_id   = var.parent_id == "" ? var.rest_api_ids.root_resource_id : var.parent_id
   resource_id = var.create_api_gateway_resource ? aws_api_gateway_resource.resource[0].id : local.parent_id
 
+  options_method_response = {
+    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+  }
+  options_integration_response = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'${var.url}'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT,DELETE'"
+  }
+
   http_status_codes = {
     "201" = "Created"
     "202" = "Accepted"
@@ -51,7 +60,7 @@ locals {
     "429" = "TooManyRequests"
     "431" = "RequestHeaderFieldsTooLarge"
     "451" = "UnavailableForLegalReasons"
-    "500" = "InternalServerError"
+    "500" = "InternalServerError" # catch-all regex 
     "501" = "NotImplemented"
     "502" = "BadGateway"
     "503" = "ServiceUnavailable"
