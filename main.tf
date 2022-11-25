@@ -21,14 +21,14 @@ resource "aws_api_gateway_method" "method" {
   http_method = var.http_method
 
   # OPTIONAL
-  authorization        = null
-  authorizer_id        = null
-  authorization_scopes = null
-  api_key_required     = null
-  operation_name       = null
-  request_models       = null
-  request_validator_id = null
-  request_parameters   = null
+  authorization        = var.authorization
+  authorizer_id        = var.authorizer_id
+  authorization_scopes = var.authorization_scopes
+  api_key_required     = var.api_key_required
+  operation_name       = var.operation_name
+  request_models       = var.method_request_models
+  request_validator_id = var.request_validator_id
+  request_parameters   = var.method_request_parameters
 }
 
 resource "aws_api_gateway_method" "options_method" {
@@ -40,14 +40,10 @@ resource "aws_api_gateway_method" "options_method" {
   http_method = "OPTIONS"
 
   # OPTIONAL
-  authorization        = null
-  authorizer_id        = null
-  authorization_scopes = null
-  api_key_required     = null
-  operation_name       = null
-  request_models       = null
-  request_validator_id = null
-  request_parameters   = null
+  authorization        = var.authorization
+  authorizer_id        = var.authorizer_id
+  authorization_scopes = var.authorization_scopes
+  api_key_required     = var.api_key_required
 }
 
 
@@ -66,7 +62,7 @@ resource "aws_api_gateway_integration" "integration" {
   # OPTIONAL
   connection_type      = var.connection_type
   connection_id        = var.connection_id # only for VPC_LINK
-  uri                  = var.uri # REQUIRED for AWS (this is the ARN of the Lambda function)
+  uri                  = var.uri           # REQUIRED for AWS (this is the ARN of the Lambda function)
   credentials          = var.credentials
   request_templates    = var.request_templates
   request_parameters   = var.request_parameters
@@ -77,7 +73,7 @@ resource "aws_api_gateway_integration" "integration" {
   timeout_milliseconds = var.timeout_milliseconds
 
   dynamic "tls_config" {
-    for_each = var.insecure_skip_verification != null ? [1] : []
+    for_each                   = var.insecure_skip_verification != null ? [1] : []
     insecure_skip_verification = var.insecure_skip_verification
   }
 }
@@ -118,7 +114,7 @@ resource "aws_api_gateway_integration_response" "integration_response" {
   content_handling    = var.content_handling
   response_parameters = null
   response_templates  = null
-  selection_pattern   = "${each.key} ${lookup(local.http_status_codes, each.key, null)}"
+  selection_pattern   = var.selection_pattern == null ? "${each.key} ${lookup(local.http_status_codes, each.key, null)}" : var.selection_pattern
 
   depends_on = [
     aws_api_gateway_integration.integration,
@@ -127,7 +123,7 @@ resource "aws_api_gateway_integration_response" "integration_response" {
 }
 
 resource "aws_api_gateway_integration_response" "options_integration_response" {
-  count      = var.create_options_method ? 1 : 0
+  count = var.create_options_method ? 1 : 0
   depends_on = [
     aws_api_gateway_integration.options_integration,
     aws_api_gateway_method_response.options_method_response

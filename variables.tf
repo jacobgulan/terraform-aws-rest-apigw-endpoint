@@ -57,14 +57,62 @@ variable "tags" {
 }
 
 variable "lambda_status_codes" {
-  type        = list(number)
   description = "List of status codes to map to lambda integration. 200 provided by default."
+  type        = list(number)
   default     = [400, 401, 403, 404, 405, 500]
 }
 
 # ----------------------------------------------------------------------------
 # Method Request Variables
 # ----------------------------------------------------------------------------
+
+variable "authorization" {
+  description = "The type of authorization used for the method. Valid values are NONE for open access, AWS_IAM for using AWS IAM permissions, CUSTOM for using a custom authorizer, or COGNITO_USER_POOLS for using a Cognito user pool."
+  type        = string
+  default     = "NONE"
+}
+
+variable "authorizer_id" {
+  description = "The ID of the Authorizer resource to be associated with this method, if the authorizationType is CUSTOM or COGNITO_USER_POOLS."
+  type        = string
+  default     = null
+}
+
+variable "authorization_scopes" {
+  description = "A list of the authorization scopes configured on the method. The scopes are used with a COGNITO_USER_POOLS authorizer to authorize the method invocation. The authorization works by matching the method scopes against the scopes parsed from the access token in the incoming request. The method invocation is authorized if any method scopes matches a claimed scope in the access token. Otherwise, the invocation is not authorized. When the method scope is configured, the client must provide an access token instead of an identity token for authorization purposes."
+  type        = list(string)
+  default     = null
+}
+
+variable "api_key_required" {
+  description = "Specifies whether the method requires a valid API key."
+  type        = bool
+  default     = false
+}
+
+variable "operation_name" {
+  description = "The operation name for the method."
+  type        = string
+  default     = null
+}
+
+variable "method_request_models" {
+  description = "A map of the API models used for the request's content type. Key is the content type, value is the model name."
+  type        = map(string)
+  default     = null
+}
+
+variable "method_request_parameters" {
+  description = "A map of the required request parameters that can be accepted by the method. Key is the parameter name, value is a boolean flag indicating whether the parameter is required. A parameter is required only if the flag is true and it is not marked as Nullable in the method request's model."
+  type        = map(bool)
+  default     = null
+}
+
+variable "request_validator_id" {
+  description = "The ID of the associated Request Validator."
+  type        = string
+  default     = null
+}
 
 # ----------------------------------------------------------------------------
 # Integration Request Variables
@@ -79,7 +127,7 @@ variable "integration_http_method" {
 variable "type" {
   description = "The type of the integration. Valid values: AWS, AWS_PROXY, HTTP, HTTP_PROXY, MOCK"
   type        = string
-  default     = "AWS"  # non-proxy integration, less bloat
+  default     = "AWS" # non-proxy integration, less bloat
 }
 
 variable "connection_type" {
@@ -109,7 +157,7 @@ variable "content_handling" {
 variable "request_templates" {
   description = "A map of request templates to be used for the integration. The key should be the content type of the template, and the value should be the template itself. The template can be a string or a file path. The file path must be relative to the root of the module."
   type        = map(string)
-  default     = {
+  default = {
     "application/json" = <<-EOT
       "body" : $input.json('$'),
     EOT
@@ -130,8 +178,8 @@ variable "passthrough_behavior" {
 
 variable "cache_key_parameters" {
   description = "A list of request parameters whose values API Gateway caches. If a request contains any of these parameters, API Gateway caches the response."
-  type = list(string)
-  default = null
+  type        = list(string)
+  default     = null
 }
 
 variable "cache_namespace" {
@@ -150,6 +198,11 @@ variable "timeout_milliseconds" {
 # Integration Response Variables
 # ----------------------------------------------------------------------------
 
+variable "selection_pattern" {
+  description = "The selection pattern of the integration response. Handled by default, but setting a value overrides the default value."
+  type        = string
+  default     = null
+}
 
 # ----------------------------------------------------------------------------
 # Method Response Variables
