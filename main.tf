@@ -40,10 +40,7 @@ resource "aws_api_gateway_method" "options_method" {
   http_method = "OPTIONS"
 
   # OPTIONAL
-  authorization        = var.authorization
-  authorizer_id        = var.authorizer_id
-  authorization_scopes = var.authorization_scopes
-  api_key_required     = var.api_key_required
+  authorization        = "NONE"
 }
 
 
@@ -80,6 +77,13 @@ resource "aws_api_gateway_integration" "integration" {
 
 resource "aws_api_gateway_integration" "options_integration" {
   count = var.create_options_method ? 1 : 0
+
+  # REQUIRED
+  rest_api_id       = var.rest_api_ids.id
+  resource_id       = local.resource_id
+  http_method       = aws_api_gateway_method.options_method[0].http_method
+  type              = "MOCK"
+  request_templates = { "application/json" = jsonencode({ statusCode = 200 }) }
 }
 
 
@@ -93,6 +97,10 @@ resource "aws_api_gateway_integration_response" "integration_response_success" {
   resource_id = local.resource_id
   http_method = var.http_method
   status_code = "200"
+
+  # OPTIONAL
+  response_parameters = var.integration_response_parameters != null ? var.integration_response_parameters : local.options_integration_response_parameters
+  response_templates  = var.integration_response_success_template
 
   depends_on = [
     aws_api_gateway_integration.integration,
@@ -130,9 +138,23 @@ resource "aws_api_gateway_integration_response" "integration_response" {
 
 resource "aws_api_gateway_integration_response" "options_integration_response" {
   count = var.create_options_method ? 1 : 0
+
+  # REQUIRED
+  rest_api_id = var.rest_api_ids.id
+  resource_id = local.resource_id
+  http_method = aws_api_gateway_method.options_method[0].http_method
+  status_code = aws_api_gateway_method.options_method_response[0].status_code
+
+  # OPTIONAL
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'${join(",", var.allow_headers)}'"
+    "method.response.header.Access-Control-Allow-Methods" = "'${join(",", var.allow_methods)}'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'${var.allow_origin}'"
+    "method.response.header.Access-Control-Max-Age"       = "'${tostring(var.max_age)}'"
+  }
+
   depends_on = [
-    aws_api_gateway_integration.options_integration,
-    aws_api_gateway_method_response.options_method_response
+    aws_api_gateway_integration.options_integration
   ]
 }
 
@@ -169,4 +191,19 @@ resource "aws_api_gateway_method_response" "method_response" {
 
 resource "aws_api_gateway_method_response" "options_method_response" {
   count = var.create_options_method ? 1 : 0
+
+  # REQUIRED
+  rest_api_id = var.rest_api_ids.id
+  resource_id = local.resource_id
+  http_method = aws_api_gateway_method.options_method[0].http_method
+  status_code = "200"
+
+  # OPTIONAL
+  response_models = { "application/json" = "Empty" }
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Max-Age"       = true
+  }
 }

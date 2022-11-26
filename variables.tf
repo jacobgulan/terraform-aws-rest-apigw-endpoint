@@ -198,11 +198,16 @@ variable "timeout_milliseconds" {
 # Integration Response Variables
 # ----------------------------------------------------------------------------
 
-variable "integration_response_templates" {
-  description = "Response tempaltes to attach to the integration response. "
+variable "integration_response_success_template" {
+  description = "Response template to attach to the integration response success."
   type        = map(string)
   default     = null
+}
 
+variable "integration_response_templates" {
+  description = "Response template to attach to the integration response."
+  type        = map(string)
+  default     = null
 }
 
 variable "integration_response_parameters" {
@@ -243,8 +248,26 @@ variable "create_options_method" {
   default     = true
 }
 
-variable "url" {
-  description = "The URL of the frontend"
+variable "allow_headers" {
+  description = "List of Access-Control-Allow-Headers"
+  type        = list(string)
+  default     = ["Authorization", "Content-Type", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
+}
+
+variable "allow_methods" {
+  description = "List of Access-Control-Allow-Methods"
+  type        = list(string)
+  default     = ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+}
+
+variable "allow_origin" {
+  description = "The origin to allow"
   type        = string
   default     = "*"
+}
+
+variable "allow_max_age" {
+  description = "Access-Control-Max-Age. Defaults to 86400 (24 hours)"
+  type        = number
+  default     = 86400
 }

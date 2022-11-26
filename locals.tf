@@ -8,8 +8,8 @@ locals {
   lambda_status_codes = compact([for status in var.lambda_status_codes : status == 200 ? "" : x]) # removes any possible 200 status from the list
 
   options_integration_response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "'${var.url}'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT,DELETE'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'${var.allow_origin}'"
+    "method.response.header.Access-Control-Allow-Methods" = "'${join(",", var.allow_methods)}'"
   }
   options_method_response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = true
