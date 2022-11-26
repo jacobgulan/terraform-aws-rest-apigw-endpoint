@@ -159,7 +159,9 @@ variable "integration_request_templates" {
   type        = map(string)
   default = {
     "application/json" = <<-EOT
-      "body" : $input.json('$'),
+      {
+        "method" : "$context.httpMethod"
+      }
     EOT
   }
 }
