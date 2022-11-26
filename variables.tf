@@ -154,7 +154,7 @@ variable "content_handling" {
   default     = null
 }
 
-variable "request_templates" {
+variable "integration_request_templates" {
   description = "A map of request templates to be used for the integration. The key should be the content type of the template, and the value should be the template itself. The template can be a string or a file path. The file path must be relative to the root of the module."
   type        = map(string)
   default = {
@@ -164,7 +164,7 @@ variable "request_templates" {
   }
 }
 
-variable "request_parameters" {
+variable "integration_request_parameters" {
   description = "A map of request parameters to be used for the integration. The key should be the method request parameter name, and the value should be the integration request parameter value. The value can be a static value or a JSON path expression."
   type        = map(string)
   default     = null
@@ -198,16 +198,40 @@ variable "timeout_milliseconds" {
 # Integration Response Variables
 # ----------------------------------------------------------------------------
 
-variable "selection_pattern" {
-  description = "The selection pattern of the integration response. Handled by default, but setting a value overrides the default value."
-  type        = string
+variable "integration_response_templates" {
+  description = "Response tempaltes to attach to the integration response. "
+  type        = map(string)
   default     = null
+
+}
+
+variable "integration_response_parameters" {
+  description = "Response parameters to attach to the integration response."
+  type        = map(string)
+  default     = null # Default value set in locals. But can be overridden here.
 }
 
 # ----------------------------------------------------------------------------
 # Method Response Variables
 # ----------------------------------------------------------------------------
 
+variable "method_response_success_model" {
+  description = "The model to use for method response successes."
+  type        = map(string)
+  default     = { "application/json" = "Empty" }
+}
+
+variable "method_response_error_model" {
+  description = "The model to use for method response failures."
+  type        = map(string)
+  default     = { "application/json" = "Empty" }
+}
+
+variable "method_response_parameters" {
+  description = "A map of the method response parameters that can be sent back to the caller. Key is the parameter name, value is a boolean flag indicating whether the parameter is required."
+  type        = map(bool)
+  default     = null
+}
 
 # ----------------------------------------------------------------------------
 # Options Method

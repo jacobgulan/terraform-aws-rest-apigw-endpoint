@@ -7,13 +7,13 @@ locals {
   resource_id         = var.create_api_gateway_resource ? aws_api_gateway_resource.resource[0].id : local.parent_id
   lambda_status_codes = compact([for status in var.lambda_status_codes : status == 200 ? "" : x]) # removes any possible 200 status from the list
 
-  options_method_response = {
-    "method.response.header.Access-Control-Allow-Origin"  = true
-    "method.response.header.Access-Control-Allow-Methods" = true
-  }
-  options_integration_response = {
+  options_integration_response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'${var.url}'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT,DELETE'"
+  }
+  options_method_response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Methods" = true
   }
 
   http_status_codes = {

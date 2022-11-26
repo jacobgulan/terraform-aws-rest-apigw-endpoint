@@ -64,8 +64,8 @@ resource "aws_api_gateway_integration" "integration" {
   connection_id        = var.connection_id # only for VPC_LINK
   uri                  = var.uri           # REQUIRED for AWS (this is the ARN of the Lambda function)
   credentials          = var.credentials
-  request_templates    = var.request_templates
-  request_parameters   = var.request_parameters
+  request_templates    = var.integration_request_templates
+  request_parameters   = var.integration_request_parameters
   passthrough_behavior = var.passthrough_behavior
   cache_key_parameters = var.cache_key_parameters
   cache_namespace      = var.cache_namespace
@@ -112,9 +112,15 @@ resource "aws_api_gateway_integration_response" "integration_response" {
 
   # OPTIONAL
   content_handling    = var.content_handling
-  response_parameters = null
-  response_templates  = null
-  selection_pattern   = var.selection_pattern == null ? "${each.key} ${lookup(local.http_status_codes, each.key, null)}" : var.selection_pattern
+  selection_pattern   = each.key == "500" ? "(\\n|.)+" : ".*${each.key} ${lookup(local.http_status_codes, each.key, "Request")}.*" # 500 is a catch-all for other errors not caught by the other status codes regex
+  response_parameters = var.integration_response_parameters != null ? var.integration_response_parameters : local.options_integration_response_parameters
+  response_templates  = var.integration_response_templates != null ? var.integration_response_templates : <<-EOT
+  #set($inputRoot = $input.path('$'))
+  {
+    "httpStatus" : ${each.key},
+    "errorType" : "$inputRoot.errorType",
+  }
+  EOT
 
   depends_on = [
     aws_api_gateway_integration.integration,
@@ -141,6 +147,10 @@ resource "aws_api_gateway_method_response" "method_response_success" {
   resource_id = local.resource_id
   http_method = var.http_method
   status_code = "200"
+
+  # OPTIONAL
+  response_models     = var.method_response_success_model
+  response_parameters = var.method_response_parameters == null ? local.options_method_response_parameters : var.method_response_parameters
 }
 
 resource "aws_api_gateway_method_response" "method_response" {
@@ -153,8 +163,8 @@ resource "aws_api_gateway_method_response" "method_response" {
   status_code = each.key
 
   # OPTIONAL
-  response_models     = null
-  response_parameters = null
+  response_models     = tonumber(each.key) >= 400 ? var.method_response_error_model : var.method_response_success_model
+  response_parameters = var.method_response_parameters == null ? local.options_method_response_parameters : var.method_response_parameters
 }
 
 resource "aws_api_gateway_method_response" "options_method_response" {
