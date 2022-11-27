@@ -68,11 +68,6 @@ resource "aws_api_gateway_integration" "integration" {
   cache_namespace      = var.cache_namespace
   content_handling     = var.content_handling
   timeout_milliseconds = var.timeout_milliseconds
-
-  dynamic "tls_config" {
-    for_each                   = var.insecure_skip_verification != null ? [1] : []
-    insecure_skip_verification = var.insecure_skip_verification
-  }
 }
 
 resource "aws_api_gateway_integration" "options_integration" {

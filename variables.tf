@@ -114,12 +114,6 @@ variable "request_validator_id" {
   default     = null
 }
 
-variable "insecure_skip_verification" {
-  description = "If true, the SSL certificate used by the target HTTPS endpoint is not validated."
-  type        = bool
-  default     = null
-}
-
 # ----------------------------------------------------------------------------
 # Integration Request Variables
 # ----------------------------------------------------------------------------
