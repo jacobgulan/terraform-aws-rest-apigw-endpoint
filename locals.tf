@@ -3,7 +3,7 @@
 ##############################################################################
 
 locals {
-  parent_id           = var.parent_id == "" ? var.rest_api_ids.root_resource_id : var.parent_id
+  parent_id           = var.parent_id == null ? var.rest_api_ids.root_resource_id : var.parent_id
   resource_id         = var.create_api_gateway_resource ? aws_api_gateway_resource.resource[0].id : local.parent_id
   lambda_status_codes = compact([for status in var.lambda_status_codes : status == 200 ? "" : status]) # removes any possible 200 status from the list
 
