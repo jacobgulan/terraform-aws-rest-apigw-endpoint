@@ -117,13 +117,15 @@ resource "aws_api_gateway_integration_response" "integration_response" {
   content_handling    = var.content_handling
   selection_pattern   = each.key == "500" ? "(\\n|.)+" : ".*${each.key} ${lookup(local.http_status_codes, each.key, "Request")}.*" # 500 is a catch-all for other errors not caught by the other status codes regex
   response_parameters = var.integration_response_parameters != null ? var.integration_response_parameters : local.options_integration_response_parameters
-  response_templates  = var.integration_response_templates != null ? var.integration_response_templates : <<-EOT
-  #set($inputRoot = $input.path('$'))
-  {
-    "httpStatus" : ${each.key},
-    "errorType" : "$inputRoot.errorType",
+  response_templates  = var.integration_response_templates != null ? var.integration_response_templates : {
+    "application/json" = <<-EOT
+      #set($inputRoot = $input.path('$'))
+      {
+        "httpStatus" : ${each.key},
+        "errorType" : "$inputRoot.errorType",
+      }
+    EOT
   }
-  EOT
 
   depends_on = [
     aws_api_gateway_integration.integration,
