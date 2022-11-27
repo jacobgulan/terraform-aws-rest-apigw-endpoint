@@ -3,8 +3,8 @@
 ##############################################################################
 
 module "apigw_endpoint" {
-  source  = "app.terraform.io/rest-apigw-endpoint"
-  version = "0.1.0"
+  source  = "app.terraform.io/{YOUR-ORGANIZATION-NAME}/rest-apigw-endpoint/aws"
+  version = "0.1.2"
 
   rest_api_ids = {
     id               = aws_api_gateway_rest_api.api.id
