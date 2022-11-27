@@ -140,7 +140,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
   rest_api_id = var.rest_api_ids.id
   resource_id = local.resource_id
   http_method = aws_api_gateway_method.options_method[0].http_method
-  status_code = aws_api_gateway_method.options_method_response[0].status_code
+  status_code = aws_api_gateway_method_response.options_method_response[0].status_code
 
   # OPTIONAL
   response_parameters = {
