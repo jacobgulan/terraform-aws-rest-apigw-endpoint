@@ -147,7 +147,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     "method.response.header.Access-Control-Allow-Headers" = "'${join(",", var.allow_headers)}'"
     "method.response.header.Access-Control-Allow-Methods" = "'${join(",", var.allow_methods)}'"
     "method.response.header.Access-Control-Allow-Origin"  = "'${var.allow_origin}'"
-    "method.response.header.Access-Control-Max-Age"       = "'${tostring(var.max_age)}'"
+    "method.response.header.Access-Control-Max-Age"       = "'${tostring(var.allow_max_age)}'"
   }
 
   depends_on = [
