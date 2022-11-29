@@ -164,7 +164,7 @@ resource "aws_api_gateway_method_response" "method_response_success" {
   # REQUIRED
   rest_api_id = var.rest_api_ids.id
   resource_id = local.resource_id
-  http_method = var.http_method
+  http_method = aws_api_gateway_method.method[0].http_method
   status_code = "200"
 
   # OPTIONAL
@@ -178,7 +178,7 @@ resource "aws_api_gateway_method_response" "method_response" {
   # REQUIRED
   rest_api_id = var.rest_api_ids.id
   resource_id = local.resource_id
-  http_method = var.http_method
+  http_method = aws_api_gateway_method.method[0].http_method
   status_code = each.key
 
   # OPTIONAL
