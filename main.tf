@@ -52,7 +52,7 @@ resource "aws_api_gateway_integration" "integration" {
   # REQUIRED
   rest_api_id             = var.rest_api_ids.id
   resource_id             = local.resource_id
-  http_method             = var.http_method
+  http_method             = aws_api_gateway_method.method.http_method
   integration_http_method = var.integration_http_method
   type                    = var.type
 
